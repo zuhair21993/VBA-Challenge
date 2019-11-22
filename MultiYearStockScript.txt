@@ -1,0 +1,122 @@
+Sub StockMarket()
+ 
+ For Each ws In Worksheets
+
+    Dim i As Long
+    Dim j As Integer
+    Dim vol As Double
+    vol = 0
+    Dim stock_change As Double
+    Dim percent_change As Double
+    Dim OpeningVal As Double
+    Dim ClosingVal As Double
+
+    Dim min_ticker, max_ticker, max_vol_ticker As String
+    min_ticker = ""
+    max_ticker = ""
+    max_vol_ticker = ""
+
+    Dim max_percent As Double
+    max_percent = 0
+    Dim max_vol As Double
+    max_vol = 0
+    Dim min_percent As Double
+    min_percent = 0
+
+
+    lastrow = ws.Cells(Rows.Count, 1).End(xlUp).Row
+ 
+
+    ws.Range("I1,O1") = "Ticker"
+    ws.Range("L1") = "Total Stock Volume"
+    ws.Range("J1") = "Yearly Change"
+    ws.Range("K1") = "Percentage Change"
+    ws.Range("R1") = "Opening Price"
+    ws.Range("R1").Font.ColorIndex = 2
+    ws.Range("S1") = "Closing Price"
+    ws.Range("S1").Font.ColorIndex = 2
+    ws.Range("N2") = "Greatest % Increase"
+    ws.Range("N3") = "Greatest % Decrease"
+    ws.Range("N4") = "Greatest Total Volume"
+    ws.Range("P1") = "Value"
+    ws.Range("I1:P1,N2:N4").Font.Bold = True
+        
+    j = 2
+    For i = 2 To lastrow
+            ' Handle the first ticker since there is no change
+            If i = 2 Then
+                OpeningVal = ws.Cells(i, 3)
+                ws.Cells(j, 18) = OpeningVal
+                
+            End If
+
+            If ws.Cells(i + 1, 1) <> ws.Cells(i, 1) Then
+                 ws.Cells(j, 9) = ws.Cells(i, 1)
+
+                vol = vol + ws.Cells(i, 7)
+                If max_vol < vol Then
+                max_vol = vol
+                max_vol_ticker = ws.Cells(i, 1)
+                End If
+
+                ws.Cells(j, 12) = vol
+                j = j + 1
+                vol = 0
+                ClosingVal = ws.Cells(i, 6)
+
+                ws.Cells(j - 1, 18) = OpeningVal
+                ws.Cells(j - 1, 18).Font.ColorIndex = 2
+                ws.Cells(j - 1, 19) = ClosingVal
+                ws.Cells(j - 1, 19).Font.ColorIndex = 2
+
+                stock_change = ws.Cells(j - 1, 19) - ws.Cells(j - 1, 18)
+                ws.Cells(j - 1, 10) = stock_change
+
+                If ws.Cells(j - 1, 10) < 0 Then
+                    ws.Cells(j - 1, 10).Interior.ColorIndex = 3
+                Else
+                    ws.Cells(j - 1, 10).Interior.ColorIndex = 4
+                End If
+
+                If OpeningVal <> 0 Then
+                   percent_change = stock_change / OpeningVal
+                ws.Cells(j - 1, 11) = percent_change
+                ws.Cells(j - 1, 11).NumberFormat = "0.00%"
+                Else
+                    percent_change = "0"
+                    ws.Cells(j - 1, 11) = percent_change
+                    ws.Cells(j - 1, 11).NumberFormat = "0.00%"
+                End If
+
+                If min_percent > percent_change Then
+                    min_percent = percent_change
+                    min_ticker = ws.Cells(i, 1)
+                End If
+                If max_percent < percent_change Then
+                    max_percent = percent_change
+                    max_ticker = ws.Cells(i, 1)
+                 End If
+                 
+            ElseIf ws.Cells(i - 1, 1) <> ws.Cells(i, 1) Then
+                OpeningVal = ws.Cells(i, 3)
+            Else
+                    vol = vol + ws.Cells(i, 7)
+               
+            End If
+        Next i
+
+        ws.Cells(3, 15) = min_ticker
+        ws.Cells(3, 16) = min_percent
+        ws.Cells(3, 16).NumberFormat = "0.00%"
+        ws.Cells(2, 15) = max_ticker
+        ws.Cells(2, 16) = max_percent
+        ws.Cells(2, 16).NumberFormat = "0.00%"
+        ws.Cells(4, 15) = max_vol_ticker
+        ws.Cells(4, 16) = max_vol
+
+        ws.Range("a:p").EntireColumn.AutoFit
+Next ws
+End Sub
+
+
+
